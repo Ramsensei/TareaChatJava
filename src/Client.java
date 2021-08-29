@@ -1,5 +1,11 @@
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,6 +23,11 @@ public class Client {
 	JPanel panel_area_chat = null;
 	JPanel panel_btntxt = null;
 	JScrollPane scroll = null;
+	
+	//Communication Attributes
+	Socket socket = null;
+	BufferedReader reader = null;
+	PrintWriter writer = null;
 	
 	public Client() {
 		doInterface();
@@ -46,6 +57,70 @@ public class Client {
 		chat_win.setVisible(true);
 		chat_win.setResizable(false);
 		chat_win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		Thread main_thread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					//Initialize Server Socket
+					socket = new Socket("localhost", 9000);
+					//Run Socket Communication
+					read();
+					write();
+				
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		main_thread.start();
+		
+	}
+	
+	public void read() {
+		Thread read_thread = new Thread(new Runnable() {
+			public void run() { //Thread Run
+				try {
+					// Initialize reader
+					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					//Read the message
+					while(true) {
+						String message_recived = reader.readLine();
+						area_chat.append(message_recived);
+					}
+				}
+				catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+		});
+		read_thread.start();
+	}
+	
+	public void write() {
+		Thread write_thread = new Thread(new Runnable() {
+			public void run() { //Thread Run
+				try {
+					// Initialize Writer
+					writer = new PrintWriter(socket.getOutputStream(), true);
+					// button ActionListener
+					btn_send.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							// When button is pressed
+							String message = txt_message.getText();
+							writer.println(message);
+						}
+					});
+				}
+				catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		write_thread.start();
+		
 	}
 	
 	public static void main(String[] args) {

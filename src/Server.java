@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -56,12 +58,32 @@ public class Server {
 		chat_win.setVisible(true);
 		chat_win.setResizable(false);
 		chat_win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		Thread main_thread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					//Initialize Server Socket
+					server = new ServerSocket(9000);
+					//Run Socket Communication
+					while(true) {
+						socket = server.accept();
+						read();
+						write();
+					}
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		main_thread.start();
 	}
 	
 	
 	public void read() {
 		Thread read_thread = new Thread(new Runnable() {
-			public void run() {
+			public void run() { //Thread Run
 				try {
 					// Initialize reader
 					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -80,14 +102,28 @@ public class Server {
 	}
 	
 	public void write() {
-		try {
-			// Initialize Writer
-			writer = new PrintWriter(socket.getOutputStream(), true);
-			
-		}
-		catch(Exception ex){
-			ex.printStackTrace();
-		}
+		Thread write_thread = new Thread(new Runnable() {
+			public void run() { //Thread Run
+				try {
+					// Initialize Writer
+					writer = new PrintWriter(socket.getOutputStream(), true);
+					// button ActionListener
+					btn_send.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							// When button is pressed
+							String message = txt_message.getText();
+							writer.println(message);
+						}
+					});
+				}
+				catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+		});
+		
+		write_thread.start();
+		
 	}
 	
 	public static void main(String[] args) {

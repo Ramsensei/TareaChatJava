@@ -1,5 +1,10 @@
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -9,7 +14,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class Server {
-	// Interface Properties
+	// Interface Attributes
 	JFrame chat_win = null;
 	JButton btn_send = null;
 	JTextField txt_message = null;
@@ -18,6 +23,11 @@ public class Server {
 	JPanel panel_btntxt = null;
 	JScrollPane scroll = null;
 	
+	//Communication Attributes
+	ServerSocket server = null;
+	Socket socket = null;
+	BufferedReader reader = null;
+	PrintWriter writer = null;
 	public Server() {
 		doInterface();
 	}
@@ -46,6 +56,38 @@ public class Server {
 		chat_win.setVisible(true);
 		chat_win.setResizable(false);
 		chat_win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	
+	
+	public void read() {
+		Thread read_thread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					// Initialize reader
+					reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					//Read the message
+					while(true) {
+						String message_recived = reader.readLine();
+						area_chat.append(message_recived);
+					}
+				}
+				catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+		});
+		read_thread.start();
+	}
+	
+	public void write() {
+		try {
+			// Initialize Writer
+			writer = new PrintWriter(socket.getOutputStream(), true);
+			
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args) {

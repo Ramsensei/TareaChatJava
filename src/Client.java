@@ -61,7 +61,7 @@ public class Client {
 		Thread main_thread = new Thread(new Runnable() {
 			public void run() {
 				try {
-					//Initialize Server Socket
+					//Initialize Socket
 					socket = new Socket("localhost", 9000);
 					//Run Socket Communication
 					read();

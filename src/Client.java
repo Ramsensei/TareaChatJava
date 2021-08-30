@@ -33,7 +33,7 @@ public class Client {
 	int number = 0;
 	
 	public Client(Socket socket) throws IOException {
-		//doInterface();
+		doInterface();
 		this.socket = socket;
 		reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		writer = new PrintWriter(this.socket.getOutputStream(), true);
@@ -125,7 +125,32 @@ public class Client {
 		chat_win.setResizable(false);
 		chat_win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		
+		Thread main_thread = new Thread(new Runnable() {
+			public void run() {
+				while (isConnected()) {
+					btn_send.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							try {
+								if(txt_message.getText() != null) {
+									String message = txt_message.getText();
+									Server.getInstance().sendMessage(message, number);
+									txt_message.setText(null);
+									e.wait();
+								}
+							} 
+							catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					});
+				}
+			}
+		});
+		main_thread.start();
 	}
-
 }

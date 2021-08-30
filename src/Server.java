@@ -50,13 +50,15 @@ public class Server {
 	}
 	
 	public void sendMessage(String message, int emiter) {
-		for(int i = 0; i<emiter; i++) {
-			clients.get(i).writer.println("Client " + String.valueOf(emiter) + ":" + message);
-			clients.get(i).setLastMessage(message);
-		}
-		for(int i = emiter+1; i<num_clients; i++) {
-			clients.get(i).writer.println("Client " + String.valueOf(emiter) + ":" + message);
-			clients.get(i).setLastMessage(message);
+		if(message != null) {
+			for(int i = 0; i<emiter; i++) {
+				clients.get(i).area_chat.append("Client " + String.valueOf(emiter) + ":" + message + "\n");
+				clients.get(i).setLastMessage(message);
+			}
+			for(int i = emiter+1; i<num_clients; i++) {
+				clients.get(i).area_chat.append("Client " + String.valueOf(emiter) + ":" + message + "\n");
+				clients.get(i).setLastMessage(message);
+			}
 		}
 	}
 	

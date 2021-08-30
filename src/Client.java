@@ -29,10 +29,10 @@ public class Client {
 	Socket socket = null;
 	BufferedReader reader = null;
 	PrintWriter writer = null;
-	String last_message;
+	String last_message, response = null;
 	
 	public Client(Socket socket) throws IOException {
-		doInterface();
+		//doInterface();
 		this.socket = socket;
 		reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		writer = new PrintWriter(this.socket.getOutputStream(), true);
@@ -44,6 +44,39 @@ public class Client {
 	
 	public void setLastMessage(String message) {
 		last_message = message;
+		autoRespond(message);
+	}
+	
+	public void autoRespond(String message) {
+		String productValue = null, porcentage = null, productWeight = null;
+		for(int i = 0; i < message.length(); i++) {
+			int n = 1;
+			if (Character.isDigit(message.charAt(i))) {
+				switch(n) {
+				case 1:
+					productValue += String.valueOf(message.charAt(i));
+					break;
+				case 2:
+					porcentage += String.valueOf(message.charAt(i));
+					break;
+				case 3:
+					productWeight += String.valueOf(message.charAt(i));
+					break;
+				}
+			}
+			else if(message.charAt(i) == ',') {
+				n++;
+			}
+			else if(message.charAt(i) == ' ') {
+				
+			}
+			else {
+				return;
+			}
+		}
+		float value = (float) ((Float.parseFloat(productValue)*Float.parseFloat(porcentage)/100)+(Float.parseFloat(productWeight)*0.15));
+		this.response = String.valueOf(value);
+		
 	}
 	
 	public void doInterface() {

@@ -29,7 +29,8 @@ public class Client {
 	Socket socket = null;
 	BufferedReader reader = null;
 	PrintWriter writer = null;
-	String last_message, response = null;
+	String last_message = null;
+	int number = 0;
 	
 	public Client(Socket socket) throws IOException {
 		//doInterface();
@@ -38,19 +39,24 @@ public class Client {
 		writer = new PrintWriter(this.socket.getOutputStream(), true);
 	}
 	
+	public void setNumber(int number) {
+		this.number = number;
+	}
+	
 	public boolean isConnected(){
 		return !socket.isClosed();
 	}
 	
 	public void setLastMessage(String message) {
 		last_message = message;
-		autoRespond(message);
+		autoRespond(last_message);
 	}
 	
 	public void autoRespond(String message) {
-		String productValue = null, porcentage = null, productWeight = null;
+		String productValue = "", porcentage = "", productWeight = "";
+		int n = 1;
 		for(int i = 0; i < message.length(); i++) {
-			int n = 1;
+			
 			if (Character.isDigit(message.charAt(i))) {
 				switch(n) {
 				case 1:
@@ -74,8 +80,23 @@ public class Client {
 				return;
 			}
 		}
+		if(productValue.isEmpty()) {
+			productValue = "0";
+		}
+		if(porcentage.isEmpty()) {
+			productValue = "0";
+		}
+		if(productWeight.isEmpty()) {
+			productValue = "0";
+		}
 		float value = (float) ((Float.parseFloat(productValue)*Float.parseFloat(porcentage)/100)+(Float.parseFloat(productWeight)*0.15));
-		this.response = String.valueOf(value);
+		try {
+			String response = String.valueOf(value);
+			Server.getInstance().sendMessage(response, number);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	

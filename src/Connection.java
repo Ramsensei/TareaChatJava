@@ -13,13 +13,12 @@ public class Connection extends Thread{
 	
 	@Override
 	public void run() {
+		client.writer.println("Bienvenido");
 		while (client.isConnected()) {
 			try {
 				String message = client.reader.readLine();
 				Server.getInstance().sendMessage(message, number);
-				if(client.response != null) {
-					Server.getInstance().sendMessage(client.response, number);
-					client.response = null;				}
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
